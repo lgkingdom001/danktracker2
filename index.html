@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F3F6F3">
+<meta name="description" content="Your personal Dank Memer tracker for grinders, heists, raffles, badges and achievements.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>Dank Tracker</title>
+
+<style>
+:root{
+    --bg:#f3f6f3;
+    --panel:#ffffff;
+    --panel2:#ffffff;
+    --panel3:#edf3ee;
+    --border:#e1e9e2;
+    --text:#193426;
+    --muted:#687a6e;
+    --purple:#26784a;
+    --purple2:#247a49;
+    --cyan:#32865a;
+    --green:#247a49;
+    --yellow:#ad7b16;
+    --red:#c24c45;
+    --shadow:0 5px 18px rgba(24,55,34,.06);
+}
+
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:Inter,Arial,Helvetica,sans-serif;
+    min-height:100vh;
+}
+
+button, input, select, textarea{ font:inherit; }
+button{ cursor:pointer; }
+
+.sidebar{
+    position:fixed;
+    left:0; top:0; bottom:0;
+    width:235px;
+    background:#ffffff;
+    border-right:1px solid var(--border);
+    padding:22px 15px;
+    z-index:100;
+}
+
+.logo{ font-size:21px; font-weight:900; margin-bottom:25px; padding:0 10px; }
+.logo span{ color:var(--purple); }
+
+.nav-btn{
+    width:100%; border:0; background:transparent; color:var(--muted);
+    padding:12px 13px; border-radius:11px; text-align:left; margin-bottom:6px; transition:.18s;
+}
+.nav-btn:hover{ background:#f1f7f2; color:#247a49; }
+.nav-btn.active{
+    background:#e6f4ea;
+    color:#247a49; border:1px solid #cce6d4;
+}
+
+.mobile-nav{ display:none; }
+
+.main{ margin-left:235px; padding:28px; max-width:1500px; }
+
+.topbar{ display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:25px; }
+.page-title{ margin:0; font-size:29px; font-weight:900; }
+.status{ color:var(--muted); font-size:13px; }
+.status.ok{ color:var(--green); }
+.status.error{ color:var(--red); }
+
+.grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+
+.stat{
+    background:var(--panel);
+    border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:var(--shadow);
+}
+.stat-label{ color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
+.stat-value{ font-size:26px; font-weight:900; margin-top:7px; }
+
+.section{ margin-top:25px; }
+.section-header{ display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:14px; }
+.section-title{ font-size:19px; font-weight:900; }
+
+.cards{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+
+.card{
+    background:var(--panel);
+    border:1px solid var(--border); border-radius:16px; padding:17px; box-shadow:var(--shadow);
+}
+.card.urgent{ border-color:rgba(255,92,119,.75); box-shadow:0 0 0 1px rgba(255,92,119,.12),var(--shadow); }
+.card.complete{ border-color:rgba(66,230,149,.35); }
+.card-sub.overdue-text{color:var(--red);font-weight:800}
+.card-sub.soon-text{color:#ad7b16;font-weight:800}
+
+.card-head{ display:flex; align-items:center; gap:12px; }
+.server-icon{
+    width:45px; height:45px; border-radius:12px; object-fit:cover;
+    background:var(--panel3); border:1px solid var(--border); flex:none;
+}
+.card-name{ font-weight:900; font-size:16px; }
+.card-sub{ color:var(--muted); font-size:12px; margin-top:3px; }
+.card-body{ margin-top:15px; }
+
+.row{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin:8px 0; }
+.label{ color:var(--muted); font-size:13px; }
+.value{ font-weight:800; }
+.money{ color:#ad7b16; }
+.countdown{ color:#32865a; font-weight:900; }
+
+.progress-wrap{ margin-top:12px; }
+.progress-top{ display:flex; justify-content:space-between; color:var(--muted); font-size:12px; margin-bottom:6px; }
+.progress{ width:100%; height:8px; background:#e8eee9; border-radius:99px; overflow:hidden; }
+.progress-bar{ height:100%; background:linear-gradient(90deg, #2f8b54, #72bd88); border-radius:99px; transition:width .3s; }
+
+.actions{ display:flex; flex-wrap:wrap; gap:7px; margin-top:14px; }
+.btn{ border:1px solid var(--border); background:var(--panel3); color:var(--text); border-radius:9px; padding:8px 11px; font-size:12px; font-weight:800; transition:.15s; }
+.btn:hover{ transform:translateY(-1px); border-color:#247a49; }
+.btn.primary{ background:#247a49; color:#ffffff; border-color:transparent; }
+.btn.success{ color:var(--green); }
+.btn.danger{ color:var(--red); }
+
+.add-btn{ border:0; background:#247a49; color:white; border-radius:10px; padding:10px 14px; font-weight:900; }
+.empty{ grid-column:1/-1; text-align:center; padding:40px 20px; color:var(--muted); border:1px dashed var(--border); border-radius:15px; }
+
+.modal-bg{ position:fixed; inset:0; background:rgba(20,40,26,.42); display:none; align-items:center; justify-content:center; padding:20px; z-index:1000; }
+.modal-bg.show{ display:flex; }
+.modal{ width:min(600px,100%); max-height:90vh; overflow:auto; background:#ffffff; border:1px solid var(--border); border-radius:18px; padding:22px; box-shadow:0 25px 80px rgba(0,0,0,.65); }
+.modal h2{ margin:0 0 18px; }
+
+.form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.field{ display:flex; flex-direction:column; gap:6px; }
+.field.full{ grid-column:1/-1; }
+.field label{ color:var(--muted); font-size:12px; }
+.field input, .field select, .field textarea{ width:100%; border:1px solid var(--border); background:#f7faf7; color:var(--text); border-radius:9px; padding:10px; outline:none; }
+.field input:focus, .field select:focus, .field textarea:focus{ border-color:#247a49; }
+.modal-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+
+
+.income-hero{background:linear-gradient(135deg,#ffffff,#f8fbf8);border:1px solid #dce8de;border-radius:22px;padding:24px;box-shadow:var(--shadow);}
+.income-hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.13em;color:#718278;margin-bottom:9px;}
+.income-hero h2{font-size:17px;margin:0;color:#52675a;font-weight:700;}
+.income-total{font-size:clamp(30px,4vw,42px);font-weight:900;letter-spacing:-.04em;color:#247a49;margin-top:6px;overflow-wrap:anywhere;}
+.income-caption{font-size:12px;color:#7b8b7f;margin-top:7px;}
+.income-hero-icon{width:48px;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:#e6f4ea;color:#247a49;font-size:30px;font-weight:800;flex:none;}
+.income-periods{display:flex;gap:5px;padding:4px;background:#edf3ee;border-radius:12px;margin-top:22px;width:max-content;max-width:100%;overflow-x:auto;}
+.period-btn{border:0;border-radius:9px;background:transparent;color:#66786c;padding:8px 12px;font-size:12px;font-weight:800;white-space:nowrap;}
+.period-btn.active{background:#fff;color:#247a49;box-shadow:0 1px 4px rgba(25,52,38,.10);}
+.income-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px;}
+.income-metric{padding:16px;border:1px solid #e4ece5;border-radius:15px;background:#fff;min-width:0;}
+.metric-label{font-size:12px;color:#718278;font-weight:700;}
+.metric-value{font-size:clamp(18px,2.4vw,25px);font-weight:900;margin-top:7px;overflow-wrap:anywhere;}
+.income-metric.positive .metric-value{color:#247a49;}
+.income-metric.negative .metric-value{color:#c24c45;}
+.metric-note{font-size:11px;color:#87948a;margin-top:5px;}
+.dashboard-counts{margin-top:15px;}
+.activity-list{display:grid;gap:9px;}
+.activity-row{display:flex;align-items:center;gap:12px;padding:13px 14px;background:#fff;border:1px solid var(--border);border-radius:14px;min-width:0;}
+.activity-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#e6f4ea;color:#247a49;font-size:19px;flex:none;}
+.activity-icon.expense{background:#fcebe9;color:#c24c45;}
+.activity-info{flex:1;min-width:0;}
+.activity-title{font-size:13px;font-weight:800;color:#193426;}
+.activity-sub{font-size:11px;color:#7b8b7f;margin-top:4px;overflow-wrap:anywhere;}
+.activity-amount{font-size:13px;font-weight:900;white-space:nowrap;}
+.activity-amount.positive{color:#247a49;}.activity-amount.negative{color:#c24c45;}
+@media(max-width:700px){.income-hero{padding:18px;border-radius:18px;}.income-periods{width:100%;}.period-btn{flex:1;padding:8px 9px;}.income-metrics{gap:9px;}.income-metric{padding:13px;}.dashboard-counts .stat{padding:13px;}.dashboard-counts .stat-value{font-size:21px;}.activity-row{gap:9px;padding:11px;}.activity-amount{font-size:12px;}}
+
+.hidden{ display:none!important; }
+
+@media(max-width:1000px){ .grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } .cards{ grid-template-columns:1fr; } }
+@media(max-width:700px){
+    .sidebar{ display:none; } .main{ margin-left:0; padding:17px 13px 85px; }
+    .mobile-nav{ display:flex; position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,.97); border-top:1px solid var(--border); z-index:500; }
+    .mobile-nav button{ flex:1; border:0; background:transparent; color:var(--muted); padding:11px 5px; font-size:11px; }
+    .mobile-nav button.active{ color:#247a49; background:#e6f4ea; }
+    .grid{ grid-template-columns:1fr 1fr; } .form-grid{ grid-template-columns:1fr; } .field.full{ grid-column:auto; }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+    <div class="logo">Dank <span>Tracker</span></div>
+    <button class="nav-btn active" data-page="dashboard" onclick="showPage('dashboard')">🏠 Dashboard</button>
+    <button class="nav-btn" data-page="statistics" onclick="showPage('statistics')">📊 Statistics</button>
+    <button class="nav-btn" data-page="grinders" onclick="showPage('grinders')">💰 Grinders Fee</button>
+    <button class="nav-btn" data-page="heists" onclick="showPage('heists')">💣 Heist Timer</button>
+    <button class="nav-btn" data-page="raffles" onclick="showPage('raffles')">🎟️ Raffles</button>
+    <button class="nav-btn" data-page="badges" onclick="showPage('badges')">🏅 Badges</button>
+    <button class="nav-btn" data-page="achievements" onclick="showPage('achievements')">🏆 Achievements</button>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div>
+            <h1 class="page-title" id="pageTitle">Income Overview</h1>
+            <div class="status" id="status">Loading...</div>
+        </div>
+        <button class="btn" onclick="loadAll()">↻ Refresh</button>
+    </div>
+
+    <!-- DASHBOARD / INCOME OVERVIEW -->
+    <section id="page-dashboard">
+        <div class="income-hero">
+            <div class="income-hero-top">
+                <div>
+                    <div class="eyebrow">YOUR FINANCIAL OVERVIEW</div>
+                    <h2>Net Income</h2>
+                    <div class="income-total" id="incomeNet">⏣0</div>
+                    <div class="income-caption" id="incomeCaption">Based on your logged raffle activity and grinder payments</div>
+                </div>
+                <div class="income-hero-icon">↗</div>
+            </div>
+            <div class="income-periods" role="group" aria-label="Income period">
+                <button class="period-btn active" data-period="all" onclick="setIncomePeriod('all')">All time</button>
+                <button class="period-btn" data-period="today" onclick="setIncomePeriod('today')">Today</button>
+                <button class="period-btn" data-period="7d" onclick="setIncomePeriod('7d')">7 days</button>
+                <button class="period-btn" data-period="30d" onclick="setIncomePeriod('30d')">30 days</button>
+            </div>
+            <div class="income-metrics">
+                <div class="income-metric positive"><div class="metric-label">Income</div><div class="metric-value" id="incomeTotal">+⏣0</div><div class="metric-note">Net raffle profit</div></div>
+                <div class="income-metric negative"><div class="metric-label">Expenses</div><div class="metric-value" id="expenseTotal">−⏣0</div><div class="metric-note">Raffle losses + grinder fees</div></div>
+            </div>
+        </div>
+        <div class="grid dashboard-counts">
+            <div class="stat"><div class="stat-label">Grinders</div><div class="stat-value" id="statGrinders">0</div></div>
+            <div class="stat"><div class="stat-label">Active Heists</div><div class="stat-value" id="statHeists">0</div></div>
+            <div class="stat"><div class="stat-label">Raffle Records</div><div class="stat-value" id="statRaffles">0</div></div>
+            <div class="stat"><div class="stat-label">Achievements</div><div class="stat-value" id="statAchievements">0</div></div>
+        </div>
+        <div class="section">
+            <div class="section-header"><div class="section-title">Recent Activity</div><button class="btn" onclick="showPage('raffles')">View raffles →</button></div>
+            <div class="activity-list" id="incomeActivity"></div>
+        </div>
+        <div class="section">
+            <div class="section-header"><div class="section-title">Upcoming</div><div class="status">Payments and heists that need attention</div></div>
+            <div class="cards" id="dashboardUrgent"></div>
+        </div>
+    </section>
+
+    <!-- STATISTICS -->
+    <section id="page-statistics" class="hidden">
+        <div class="grid">
+            <div class="stat"><div class="stat-label">Total Grinder Fees</div><div class="stat-value" id="statFeeTotal">⏣0</div></div>
+            <div class="stat"><div class="stat-label">Raffle Entered</div><div class="stat-value" id="statRaffleEntered">⏣0</div></div>
+            <div class="stat"><div class="stat-label">Raffle Received</div><div class="stat-value" id="statRaffleReceived">⏣0</div></div>
+            <div class="stat"><div class="stat-label">Raffle Net</div><div class="stat-value" id="statRaffleNet">⏣0</div></div>
+        </div>
+    </section>
+
+    <!-- GRINDERS -->
+    <section id="page-grinders" class="hidden">
+        <div class="section-header">
+            <div><div class="section-title">💰 Grinder Fees</div><div class="status">Sorted by soonest payment due</div></div>
+            <button class="add-btn" onclick="openGrinderModal()">+ Add Grinder</button>
+        </div>
+        <div class="cards" id="grinderList"></div>
+    </section>
+
+    <!-- HEISTS -->
+    <section id="page-heists" class="hidden">
+        <div class="section-header">
+            <div><div class="section-title">💣 Heist Timer</div><div class="status">Sorted by soonest ending</div></div>
+            <button class="add-btn" onclick="openHeistModal()">+ Add Heist</button>
+        </div>
+        <div class="cards" id="heistList"></div>
+    </section>
+
+    <!-- RAFFLES -->
+    <section id="page-raffles" class="hidden">
+        <div class="section-header">
+            <div><div class="section-title">🎟️ Raffles</div><div class="status">View raffle history and combined win/loss totals</div></div>
+            <button class="add-btn" onclick="openRaffleModal()">+ Add Raffle</button>
+        </div>
+        <div class="grid raffle-summary">
+            <div class="stat"><div class="stat-label">Total Spent</div><div class="stat-value" id="raffleTotalSpent">⏣0</div></div>
+            <div class="stat"><div class="stat-label">Total Received</div><div class="stat-value" id="raffleTotalReceived">⏣0</div></div>
+            <div class="stat"><div class="stat-label">Total Net</div><div class="stat-value" id="raffleTotalNet">⏣0</div></div>
+            <div class="stat"><div class="stat-label">Wins / Losses</div><div class="stat-value" id="raffleWinLossCount">0 / 0</div></div>
+            <div class="stat"><div class="stat-label">Profit from Wins</div><div class="stat-value" id="raffleWinProfit">⏣0</div></div>
+            <div class="stat"><div class="stat-label">Amount Lost</div><div class="stat-value" id="raffleLossAmount">⏣0</div></div>
+        </div>
+        <div class="cards" id="raffleList"></div>
+    </section>
+
+    <!-- BADGES -->
+    <section id="page-badges" class="hidden">
+        <div class="section-header">
+            <div><div class="section-title">🏅 Badges</div><div class="status">Closest to completion first</div></div>
+            <button class="add-btn" onclick="openBadgeModal()">+ Add Badge</button>
+        </div>
+        <div class="cards" id="badgeList"></div>
+    </section>
+
+    <!-- ACHIEVEMENTS -->
+    <section id="page-achievements" class="hidden">
+        <div class="section-header">
+            <div><div class="section-title">🏆 Achievements</div><div class="status">Closest to completion first</div></div>
+            <button class="add-btn" onclick="openAchievementModal()">+ Add Achievement</button>
+        </div>
+        <div class="cards" id="achievementList"></div>
+    </section>
+</main>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav">
+    <button data-page="dashboard" onclick="showPage('dashboard')">🏠<br>Home</button>
+    <button data-page="grinders" onclick="showPage('grinders')">💰<br>Grinders</button>
+    <button data-page="heists" onclick="showPage('heists')">💣<br>Heists</button>
+    <button data-page="raffles" onclick="showPage('raffles')">🎟️<br>Raffles</button>
+    <button data-page="badges" onclick="showPage('badges')">🏅<br>Badges</button>
+    <button data-page="achievements" onclick="showPage('achievements')">🏆<br>Achieve</button>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://ukvmvqljfufrekqbjmbx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_n8zokysypiDxB79GAhvjOw_bzGyQmd3";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let grinders = [];
+let heists = [];
+let badges = [];
+let achievements = [];
+let raffles = [];
+let grinderPayments = [];
+let incomePeriod = "all";
+let isRefreshing = false;
+
+function $(id){ return document.getElementById(id); }
+
+function escapeHTML(val){
+    if(val === null || val === undefined) return "";
+    return String(val).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+
+function formatMoney(val){
+    const n = Number(val || 0);
+    return "⏣" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+}
+
+function parseAmount(val){
+    if(typeof val === "number") return val;
+    return Number(String(val || "").replace(/[⏣,$\s]/g,"")) || 0;
+}
+
+function toDate(val){
+    if(!val) return null;
+    // Date-only values from Supabase should be interpreted as local calendar dates.
+    if(typeof val === "string" && /^\d{4}-\d{2}-\d{2}$/.test(val)){
+        const [year, month, day] = val.split("-").map(Number);
+        const localDate = new Date(year, month - 1, day);
+        return isNaN(localDate.getTime()) ? null : localDate;
+    }
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function localInputDate(val){
+    const d = toDate(val);
+    if(!d) return "";
+    return [d.getFullYear(), String(d.getMonth()+1).padStart(2,"0"), String(d.getDate()).padStart(2,"0")].join("-");
+}
+
+function localInputDateTime(val){
+    const d = toDate(val);
+    if(!d) return "";
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0") + "T" + String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+}
+
+function countdown(val){
+    const d = toDate(val);
+    if(!d) return "No date";
+    const diff = d.getTime() - Date.now();
+    if(diff <= 0) return "DUE NOW";
+
+    let sec = Math.floor(diff/1000);
+    const days = Math.floor(sec/86400); sec %= 86400;
+    const hours = Math.floor(sec/3600); sec %= 3600;
+    const mins = Math.floor(sec/60); sec %= 60;
+
+    if(days > 0) return `${days}d ${hours}h ${mins}m`;
+    if(hours > 0) return `${hours}h ${mins}m ${sec}s`;
+    return `${mins}m ${sec}s`;
+}
+
+function percentage(cur, req){
+    const c = Number(cur || 0); const r = Number(req || 0);
+    if(r <= 0) return 0;
+    return Math.max(0, Math.min(100, (c/r)*100));
+}
+
+function updateStatus(msg, type=""){
+    const el = $("status");
+    if(!el) return;
+    el.textContent = msg;
+    el.className = "status " + type;
+}
+
+async function loadTable(tableName){
+    const res = await supabaseClient.from(tableName).select("*");
+    if(res.error){
+        console.error(`${tableName} fetch failed:`, res.error);
+        updateStatus(`Error loading ${tableName}: ${res.error.message}`, "error");
+        return [];
+    }
+    return res.data || [];
+}
+
+async function loadAll(){
+    if(isRefreshing) return;
+    isRefreshing = true;
+    updateStatus("Refreshing database...");
+
+    try {
+        const [gData, hData, bData, aData, rData, gpData] = await Promise.all([
+            loadTable("grinder_fees"),
+            loadTable("heists"),
+            loadTable("badges"),
+            loadTable("achievements"),
+            loadTable("raffles"),
+            loadTable("grinder_payments")
+        ]);
+
+        grinders = gData;
+        heists = hData;
+        badges = bData;
+        achievements = aData;
+        raffles = rData;
+        grinderPayments = gpData;
+
+        renderAll();
+        updateStatus(`Connected • ${grinders.length} Grinders Loaded`, "ok");
+    } catch(err) {
+        console.error(err);
+        updateStatus("Database connection error", "error");
+    } finally {
+        isRefreshing = false;
+    }
+}
+
+function showPage(pageId){
+    const pages = ["dashboard", "statistics", "grinders", "heists", "raffles", "badges", "achievements"];
+    pages.forEach(p => {
+        const el = $("page-" + p);
+        if(el) el.classList.toggle("hidden", p !== pageId);
+    });
+    document.querySelectorAll(".nav-btn, .mobile-nav button").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.page === pageId);
+    });
+    const pageTitles = { dashboard: "Income Overview", statistics: "Statistics", grinders: "Grinders Fee", heists: "Heist Timer", raffles: "Raffles", badges: "Badges", achievements: "Achievements" };
+    if($("pageTitle")) $("pageTitle").textContent = pageTitles[pageId] || "Dashboard";
+}
+
+function sortedGrinders(){ return [...grinders].sort((a,b) => (toDate(a.paid_until)?.getTime() ?? Infinity) - (toDate(b.paid_until)?.getTime() ?? Infinity)); }
+function sortedHeists(){ return [...heists].sort((a,b) => (toDate(a.end_time)?.getTime() ?? Infinity) - (toDate(b.end_time)?.getTime() ?? Infinity)); }
+function sortedRaffles(){ return [...raffles].sort((a,b) => Number(b.id || 0) - Number(a.id || 0)); }
+function badgeProgress(item){
+    const gold = percentage(item.gold_current, item.gold_required);
+    const plat = percentage(item.platinum_current, item.platinum_required);
+    return Number(item.platinum_required || 0) > 0 ? plat : gold;
+}
+function sortedBadges(){ return [...badges].sort((a,b) => badgeProgress(b) - badgeProgress(a)); }
+function achievementProgress(item){ return percentage(item.current, item.required); }
+function sortedAchievements(){ return [...achievements].sort((a,b) => achievementProgress(b) - achievementProgress(a)); }
+
+function closeModal(){ $("modalBg").classList.remove("show"); $("modal").innerHTML = ""; }
+
+function openGrinderModal(grinderId = null){
+    const item = grinders.find(g => g.id === grinderId) || {};
+    $("modal").innerHTML = `
+        <h2>${grinderId ? "Edit Grinder" : "Add Grinder"}</h2>
+        <form onsubmit="saveGrinder(event, ${grinderId})">
+            <div class="form-grid">
+                <div class="field full"><label>Server Name</label><input type="text" id="gServerName" value="${escapeHTML(item.server_name || '')}" required></div>
+                <div class="field"><label>Fee (Coins)</label><input type="number" id="gFee" value="${item.fee || 0}" required></div>
+                <div class="field"><label>Duration (Days)</label><input type="number" id="gDuration" value="${item.duration_days || 7}" required></div>
+                <div class="field full"><label>Paid Until Date</label><input type="date" id="gPaidUntil" value="${localInputDate(item.paid_until || new Date())}" required></div>
+                <div class="field full"><label>Description / Notes</label><textarea id="gDescription">${escapeHTML(item.description || '')}</textarea></div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn primary">Save</button>
+            </div>
+        </form>`;
+    $("modalBg").classList.add("show");
+}
+
+async function saveGrinder(e, id){
+    e.preventDefault();
+    const payload = {
+        server_name: $("gServerName").value.trim(),
+        fee: parseAmount($("gFee").value),
+        duration_days: Number($("gDuration").value) || 7,
+        paid_until: $("gPaidUntil").value,
+        description: $("gDescription").value.trim()
+    };
+
+    const savePayload = async (data) => id
+        ? await supabaseClient.from("grinder_fees").update(data).eq("id", id)
+        : await supabaseClient.from("grinder_fees").insert([data]);
+
+    let res = await savePayload(payload);
+    // Keep name/fee/date saves working if this existing table has no description column yet.
+    if(res.error && /description.*(column|schema cache)|column.*description/i.test(res.error.message || "")){
+        const { description, ...compatiblePayload } = payload;
+        res = await savePayload(compatiblePayload);
+        if(!res.error){
+            alert("Saved the grinder, but its description was not stored because your Supabase grinder_fees table is missing the description column. The other fields were saved. Add a 'description' text column later if you want notes saved too.");
+        }
+    }
+
+    if(res.error) alert("Save failed: " + res.error.message);
+    else { closeModal(); await loadAll(); }
+}
+
+async function deleteGrinder(id){
+    if(!confirm("Delete record?")) return;
+    const res = await supabaseClient.from("grinder_fees").delete().eq("id", id);
+    if(res.error) alert("Delete failed: " + res.error.message);
+    else await loadAll();
+}
+
+async function renewGrinder(id){
+    const item = grinders.find(g => g.id === id);
+    if(!item) return;
+    const baseDate = toDate(item.paid_until) && toDate(item.paid_until) > new Date() ? toDate(item.paid_until) : new Date();
+    baseDate.setDate(baseDate.getDate() + (Number(item.duration_days) || 7));
+    const res = await supabaseClient.from("grinder_fees").update({ paid_until: localInputDate(baseDate) }).eq("id", id);
+    if(res.error){ alert("Renew failed: " + res.error.message); return; }
+    const payment = await supabaseClient.from("grinder_payments").insert([{
+        grinder_id: item.id,
+        server_name: item.server_name || "Grinder",
+        amount: Number(item.fee || 0),
+        duration_days: Number(item.duration_days) || 7,
+        paid_at: new Date().toISOString()
+    }]);
+    if(payment.error) alert("Membership renewed, but its expense could not be recorded. Please apply the grinder_payments SQL setup and record this payment manually if needed: " + payment.error.message);
+    await loadAll();
+}
+
+function openHeistModal(id = null){
+    const item = heists.find(h => h.id === id) || {};
+    $("modal").innerHTML = `
+        <h2>${id ? "Edit Heist" : "Add Heist"}</h2>
+        <form onsubmit="saveHeist(event, ${id})">
+            <div class="form-grid">
+                <div class="field full"><label>Server Name</label><input type="text" id="hServerName" value="${escapeHTML(item.server_name || '')}" required></div>
+                <div class="field"><label>Amount (Coins)</label><input type="number" id="hAmount" value="${item.amount || 0}" required></div>
+                <div class="field"><label>End Time</label><input type="datetime-local" id="hEndTime" value="${localInputDateTime(item.end_time || new Date())}" required></div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn primary">Save</button>
+            </div>
+        </form>`;
+    $("modalBg").classList.add("show");
+}
+
+async function saveHeist(e, id){
+    e.preventDefault();
+    const payload = { server_name: $("hServerName").value, amount: parseAmount($("hAmount").value), end_time: $("hEndTime").value };
+    const res = id ? await supabaseClient.from("heists").update(payload).eq("id", id) : await supabaseClient.from("heists").insert([payload]);
+    if(res.error) alert("Error: " + res.error.message);
+    else { closeModal(); await loadAll(); }
+}
+
+async function deleteHeist(id){
+    if(!confirm("Delete heist?")) return;
+    const res = await supabaseClient.from("heists").delete().eq("id", id);
+    if(res.error) alert("Error: " + res.error.message);
+    else await loadAll();
+}
+
+function openRaffleModal(id = null){
+    const item = id !== null && id !== undefined ? raffles.find(r => String(r.id) === String(id)) : null;
+    const editing = Boolean(item);
+    const amounts = item ? raffleRecordAmounts(item) : {spent:0, received:0, result:'pending'};
+    const safeId = editing ? JSON.stringify(String(item.id)) : 'null';
+    $("modal").innerHTML = `
+        <h2>${editing ? "Edit Raffle" : "Add Raffle"}</h2>
+        <form onsubmit='saveRaffle(event, ${safeId})'>
+            <div class="form-grid">
+                <div class="field full"><label>Server Name</label><input type="text" id="rServerName" value="${escapeHTML(item?.server_name || '')}" required></div>
+                <div class="field"><label>Amount Entered (Coins)</label><input type="number" min="0" id="rSpent" value="${amounts.spent}" required></div>
+                <div class="field"><label>Amount Received (Coins)</label><input type="number" min="0" id="rWon" value="${amounts.received}" required></div>
+                <div class="field"><label>Result</label><select id="rResult"><option value="pending" ${amounts.result === 'pending' ? 'selected' : ''}>Pending</option><option value="win" ${amounts.result === 'win' ? 'selected' : ''}>Win</option><option value="loss" ${amounts.result === 'loss' ? 'selected' : ''}>Loss</option></select></div>
+                <div class="field"><label>Date</label><input type="date" id="rDate" value="${escapeHTML(item?.date || new Date().toISOString().slice(0,10))}" required></div>
+                <div class="field full"><label>Title</label><input type="text" id="rTitle" value="${escapeHTML(item?.title || 'Raffle Royale')}"></div>
+                <div class="field full"><label>Notes</label><input type="text" id="rNotes" value="${escapeHTML(item?.notes || '')}"></div>
+            </div>
+            ${item?.server_id ? `<p class="status">Server ID: ${escapeHTML(item.server_id)} (kept unchanged)</p>` : ''}
+            <div class="modal-actions">
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn primary">Save</button>
+            </div>
+        </form>`;
+    $("modalBg").classList.add("show");
+}
+
+async function saveRaffle(e, id){
+    e.preventDefault();
+    const existing = id !== null && id !== undefined ? raffles.find(r => String(r.id) === String(id)) : null;
+    const entered = parseAmount($("rSpent").value);
+    const received = parseAmount($("rWon").value);
+    const payload = {
+        server_name: $("rServerName").value.trim(),
+        title: $("rTitle").value.trim() || "Raffle Royale",
+        amount_entered: entered,
+        amount_received: received,
+        result: $("rResult").value,
+        date: $("rDate").value,
+        notes: $("rNotes").value.trim() || null
+    };
+    // Preserve the server ID when editing; manual records can leave it unset.
+    if(existing?.server_id) payload.server_id = existing.server_id;
+    const isEdit = id !== null && id !== undefined;
+    let query = isEdit
+        ? supabaseClient.from("raffles").update(payload).eq("id", id).select("id").maybeSingle()
+        : supabaseClient.from("raffles").insert([payload]).select("id").maybeSingle();
+    const res = await query;
+    if(res.error) alert("Raffle save failed: " + res.error.message);
+    else if(!res.data) alert("Raffle was not saved. No row was returned. Check Supabase Row Level Security (RLS) permissions for UPDATE/INSERT, or verify that this record still exists.");
+    else { closeModal(); await loadAll(); }
+}
+
+async function deleteRaffle(id){
+    if(!confirm("Delete this raffle result? This cannot be undone.")) return;
+    const res = await supabaseClient.from("raffles").delete().eq("id", id).select("id").maybeSingle();
+    if(res.error) alert("Raffle delete failed: " + res.error.message);
+    else if(!res.data) alert("Raffle was not deleted. No row was returned. Check Supabase Row Level Security (RLS) DELETE permissions, or verify that this record still exists.");
+    else await loadAll();
+}
+
+function openBadgeModal(id = null){
+    const item = badges.find(b => b.id === id) || {};
+    $("modal").innerHTML = `
+        <h2>${id ? "Edit Badge" : "Add Badge"}</h2>
+        <form onsubmit="saveBadge(event, ${id})">
+            <div class="form-grid">
+                <div class="field full"><label>Badge Name</label><input type="text" id="bName" value="${escapeHTML(item.name || '')}" required></div>
+                <div class="field"><label>Gold Current</label><input type="number" id="bGoldCur" value="${item.gold_current || 0}"></div>
+                <div class="field"><label>Gold Required</label><input type="number" id="bGoldReq" value="${item.gold_required || 0}"></div>
+                <div class="field"><label>Platinum Current</label><input type="number" id="bPlatCur" value="${item.platinum_current || 0}"></div>
+                <div class="field"><label>Platinum Required</label><input type="number" id="bPlatReq" value="${item.platinum_required || 0}"></div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn primary">Save</button>
+            </div>
+        </form>`;
+    $("modalBg").classList.add("show");
+}
+
+async function saveBadge(e, id){
+    e.preventDefault();
+    const payload = {
+        name: $("bName").value,
+        gold_current: parseAmount($("bGoldCur").value),
+        gold_required: parseAmount($("bGoldReq").value),
+        platinum_current: parseAmount($("bPlatCur").value),
+        platinum_required: parseAmount($("bPlatReq").value)
+    };
+    const res = id ? await supabaseClient.from("badges").update(payload).eq("id", id) : await supabaseClient.from("badges").insert([payload]);
+    if(res.error) alert("Error: " + res.error.message);
+    else { closeModal(); await loadAll(); }
+}
+
+async function incrementBadge(id, field, amount){
+    const item = badges.find(b => b.id === id);
+    if(!item) return;
+    const payload = {};
+    payload[field] = Number(item[field] || 0) + amount;
+    const res = await supabaseClient.from("badges").update(payload).eq("id", id);
+    if(res.error) alert("Error: " + res.error.message);
+    else await loadAll();
+}
+
+async function deleteBadge(id){
+    if(!confirm("Delete badge?")) return;
+    const res = await supabaseClient.from("badges").delete().eq("id", id);
+    if(res.error) alert("Error: " + res.error.message);
+    else await loadAll();
+}
+
+function openAchievementModal(id = null){
+    const item = achievements.find(a => a.id === id) || {};
+    $("modal").innerHTML = `
+        <h2>${id ? "Edit Achievement" : "Add Achievement"}</h2>
+        <form onsubmit="saveAchievement(event, ${id})">
+            <div class="form-grid">
+                <div class="field full"><label>Title</label><input type="text" id="aTitle" value="${escapeHTML(item.title || '')}" required></div>
+                <div class="field"><label>Current Progress</label><input type="number" id="aCurrent" value="${item.current || 0}" required></div>
+                <div class="field"><label>Required Progress</label><input type="number" id="aRequired" value="${item.required || 0}" required></div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn primary">Save</button>
+            </div>
+        </form>`;
+    $("modalBg").classList.add("show");
+}
+
+async function saveAchievement(e, id){
+    e.preventDefault();
+    const payload = { title: $("aTitle").value, current: parseAmount($("aCurrent").value), required: parseAmount($("aRequired").value) };
+    const res = id ? await supabaseClient.from("achievements").update(payload).eq("id", id) : await supabaseClient.from("achievements").insert([payload]);
+    if(res.error) alert("Error: " + res.error.message);
+    else { closeModal(); await loadAll(); }
+}
+
+async function incrementAchievement(id, amount){
+    const item = achievements.find(a => a.id === id);
+    if(!item) return;
+    const custom = amount === 'custom' ? prompt("Enter amount to add:", "1") : amount;
+    if(custom === null) return;
+    const addVal = Number(custom) || 0;
+    const res = await supabaseClient.from("achievements").update({ current: Number(item.current || 0) + addVal }).eq("id", id);
+    if(res.error) alert("Error: " + res.error.message);
+    else await loadAll();
+}
+
+async function deleteAchievement(id){
+    if(!confirm("Delete achievement?")) return;
+    const res = await supabaseClient.from("achievements").delete().eq("id", id);
+    if(res.error) alert("Error: " + res.error.message);
+    else await loadAll();
+}
+
+function grinderCard(item){
+    const dueDate = toDate(item.paid_until);
+    const dueTime = dueDate?.getTime() ?? Infinity;
+    const diff = dueTime - Date.now();
+    const isOverdue = !!dueDate && diff < 0;
+    const isSoon = !!dueDate && diff >= 0 && diff < 2 * 86400000;
+    const isUrgent = isOverdue || isSoon;
+    const dueLabel = isOverdue ? "OVERDUE" : isSoon ? "DUE SOON" : "Payment scheduled";
+    const dueClass = isOverdue ? "overdue-text" : isSoon ? "soon-text" : "";
+    return `
+        <div class="card ${isUrgent ? 'urgent' : ''}">
+            <div class="card-head">
+                <div class="server-icon" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🛡️</div>
+                <div>
+                    <div class="card-name">${escapeHTML(item.server_name)}</div>
+                    <div class="card-sub ${dueClass}">${dueLabel} · Cycle: ${Number(item.duration_days) || 7} Days</div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row"><span class="label">Fee</span><span class="value money">${formatMoney(item.fee)}</span></div>
+                <div class="row"><span class="label">Paid Until</span><span class="value">${localInputDate(item.paid_until)}</span></div>
+                <div class="row"><span class="label">Remaining</span><span class="value countdown" data-countdown="${escapeHTML(item.paid_until || "")}">${countdown(item.paid_until)}</span></div>
+                ${item.description ? `<div class="row"><span class="label">Notes:</span> <span class="value">${escapeHTML(item.description)}</span></div>` : ''}
+            </div>
+            <div class="actions">
+                <button class="btn success" onclick="renewGrinder(${item.id})">+ Extend (${item.duration_days || 7}d)</button>
+                <button class="btn primary" onclick="openGrinderModal(${item.id})">Edit</button>
+                <button class="btn danger" onclick="deleteGrinder(${item.id})">Delete</button>
+            </div>
+        </div>`;
+}
+
+function heistCard(item){
+    return `
+        <div class="card">
+            <div class="card-head">
+                <div class="server-icon" style="display:flex;align-items:center;justify-content:center;font-size:20px;">💣</div>
+                <div><div class="card-name">${escapeHTML(item.server_name)}</div><div class="card-sub">Heist Event</div></div>
+            </div>
+            <div class="card-body">
+                <div class="row"><span class="label">Pool/Prize</span><span class="value money">${formatMoney(item.amount)}</span></div>
+                <div class="row"><span class="label">Ends In</span><span class="value countdown" data-countdown="${escapeHTML(item.end_time || "")}">${countdown(item.end_time)}</span></div>
+            </div>
+            <div class="actions">
+                <button class="btn primary" onclick="openHeistModal(${item.id})">Edit</button>
+                <button class="btn danger" onclick="deleteHeist(${item.id})">Delete</button>
+            </div>
+        </div>`;
+}
+
+function raffleRecordAmounts(item){
+    const spent = Number(item.amount_entered ?? item.spent ?? 0);
+    const received = Number(item.amount_received ?? item.won ?? 0);
+    return { spent, received, net: received - spent, result: String(item.result || '').toLowerCase() };
+}
+function cleanRaffleServerName(value){
+    return String(value || 'Unknown server')
+        .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+        .replace(/\s+/g, ' ').trim() || 'Unknown server';
+}
+function raffleServerGroups(){
+    const groupsById = new Map();
+    const groupsByName = new Map();
+    const ordered = sortedRaffles();
+    // First establish canonical groups for rows that have a real server ID.
+    for(const item of ordered){
+        const name = cleanRaffleServerName(item.server_name);
+        const nameKey = name.toLocaleLowerCase();
+        const id = item.server_id ? String(item.server_id) : '';
+        if(id){
+            let group = groupsById.get(id);
+            if(!group){
+                group = { key: 'server-' + id, server_id: id, server_name: name, records: [] };
+                groupsById.set(id, group);
+            }
+            if(!groupsByName.has(nameKey)) groupsByName.set(nameKey, group);
+            group.records.push(item);
+        }
+    }
+    // Rows created before server_id was added are folded into the matching server-name group.
+    for(const item of ordered){
+        if(item.server_id) continue;
+        const name = cleanRaffleServerName(item.server_name);
+        const nameKey = name.toLocaleLowerCase();
+        let group = groupsByName.get(nameKey);
+        if(!group){
+            group = { key: 'legacy-' + nameKey, server_id: '', server_name: name, records: [] };
+            groupsByName.set(nameKey, group);
+        }
+        group.records.push(item);
+    }
+    return [...groupsById.values(), ...[...groupsByName.values()].filter(g => !g.server_id)]
+        .map(group => {
+            group.records.sort((a,b) => String(b.date || '').localeCompare(String(a.date || '')) || Number(b.id || 0)-Number(a.id || 0));
+            group.totals = group.records.reduce((acc, item) => {
+                const a = raffleRecordAmounts(item);
+                acc.spent += a.spent; acc.received += a.received;
+                acc.wins += a.result === 'win' ? 1 : 0;
+                acc.losses += a.result === 'loss' ? 1 : 0;
+                return acc;
+            }, {spent:0, received:0, wins:0, losses:0});
+            group.totals.net = group.totals.received - group.totals.spent;
+            return group;
+        }).sort((a,b) => (b.records[0]?.date || '').localeCompare(a.records[0]?.date || '') || a.server_name.localeCompare(b.server_name));
+}
+function raffleCard(group){
+    const t = group.totals;
+    const recordRows = group.records.map(item => {
+        const a = raffleRecordAmounts(item);
+        const subtitle = [item.title || 'Raffle Royale', item.date || '', a.result ? a.result.toUpperCase() : 'PENDING'].filter(Boolean).join(' · ');
+        return `<div class="row" style="align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:8px;margin-top:8px;">
+            <div style="flex:1;min-width:130px"><div style="font-weight:600">${escapeHTML(subtitle)}</div><div class="card-sub">Spent ${formatMoney(a.spent)} · Received ${formatMoney(a.received)} · Net ${formatMoney(a.net)}</div></div>
+            <button class="btn primary" onclick='openRaffleModal(${JSON.stringify(String(item.id))})'>Edit</button>
+            <button class="btn danger" onclick='deleteRaffle(${JSON.stringify(String(item.id))})'>Delete</button>
+        </div>`;
+    }).join('');
+    return `<div class="card">
+        <div class="card-head"><div class="server-icon" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🎟️</div>
+            <div><div class="card-name">${escapeHTML(group.server_name)}</div><div class="card-sub">${group.server_id ? 'Server ID: ' + escapeHTML(group.server_id) + ' · ' : ''}${group.records.length} raffle result${group.records.length === 1 ? '' : 's'}</div></div>
+        </div>
+        <div class="card-body">
+            <div class="row"><span class="label">Total Spent</span><span class="value">${formatMoney(t.spent)}</span></div>
+            <div class="row"><span class="label">Total Received</span><span class="value money">${formatMoney(t.received)}</span></div>
+            <div class="row"><span class="label">Net Profit/Loss</span><span class="value" style="color:${t.net >= 0 ? 'var(--green)' : 'var(--red)'}">${formatMoney(t.net)}</span></div>
+            <div class="row"><span class="label">Wins / Losses</span><span class="value">${t.wins} / ${t.losses}</span></div>
+            <details data-raffle-group="${escapeHTML(group.key)}" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600">View / edit raffle history (${group.records.length})</summary>${recordRows}</details>
+        </div>
+    </div>`;
+}
+
+function badgeCard(item){
+    const gPct = percentage(item.gold_current, item.gold_required);
+    const pPct = percentage(item.platinum_current, item.platinum_required);
+    return `
+        <div class="card">
+            <div class="card-head">
+                <div class="server-icon" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🏅</div>
+                <div><div class="card-name">${escapeHTML(item.name)}</div></div>
+            </div>
+            <div class="card-body">
+                ${Number(item.gold_required || 0) > 0 ? `
+                    <div class="progress-wrap">
+                        <div class="progress-top"><span>Gold</span><span>${item.gold_current || 0}/${item.gold_required} (${Math.round(gPct)}%)</span></div>
+                        <div class="progress"><div class="progress-bar" style="width:${gPct}%"></div></div>
+                    </div>` : ''}
+                ${Number(item.platinum_required || 0) > 0 ? `
+                    <div class="progress-wrap">
+                        <div class="progress-top"><span>Platinum</span><span>${item.platinum_current || 0}/${item.platinum_required} (${Math.round(pPct)}%)</span></div>
+                        <div class="progress"><div class="progress-bar" style="width:${pPct}%"></div></div>
+                    </div>` : ''}
+            </div>
+            <div class="actions">
+                <button class="btn success" onclick="incrementBadge(${item.id}, 'gold_current', 1)">+1 Gold</button>
+                <button class="btn success" onclick="incrementBadge(${item.id}, 'platinum_current', 1)">+1 Plat</button>
+                <button class="btn primary" onclick="openBadgeModal(${item.id})">Edit</button>
+                <button class="btn danger" onclick="deleteBadge(${item.id})">Delete</button>
+            </div>
+        </div>`;
+}
+
+function achievementCard(item){
+    const pct = achievementProgress(item);
+    return `
+        <div class="card ${pct >= 100 ? 'complete' : ''}">
+            <div class="card-head">
+                <div class="server-icon" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🏆</div>
+                <div><div class="card-name">${escapeHTML(item.title)}</div></div>
+            </div>
+            <div class="card-body">
+                <div class="progress-wrap">
+                    <div class="progress-top"><span>Progress</span><span>${item.current || 0}/${item.required} (${Math.round(pct)}%)</span></div>
+                    <div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn success" onclick="incrementAchievement(${item.id}, 1)">+1</button>
+                <button class="btn success" onclick="incrementAchievement(${item.id}, 'custom')">+Custom</button>
+                <button class="btn primary" onclick="openAchievementModal(${item.id})">Edit</button>
+                <button class="btn danger" onclick="deleteAchievement(${item.id})">Delete</button>
+            </div>
+        </div>`;
+}
+
+function renderGrinders(){
+    const list = $("grinderList");
+    if(list) list.innerHTML = grinders.length ? sortedGrinders().map(g => grinderCard(g)).join("") : `<div class="empty">No grinder fees found.</div>`;
+}
+
+function renderHeists(){
+    const list = $("heistList");
+    if(list) list.innerHTML = heists.length ? sortedHeists().map(h => heistCard(h)).join("") : `<div class="empty">No active heists.</div>`;
+}
+
+function renderRaffles(){
+    const list = $("raffleList");
+    if(!list) return;
+    // Preserve expanded history panels when the data refreshes.
+    const openGroups = new Set([...list.querySelectorAll('details[data-raffle-group][open]')]
+        .map(details => details.getAttribute('data-raffle-group')));
+    const groups = raffleServerGroups();
+    list.innerHTML = groups.length ? groups.map(g => raffleCard(g)).join("") : `<div class="empty">No raffle records logged.</div>`;
+    for(const details of list.querySelectorAll('details[data-raffle-group]')){
+        if(openGroups.has(details.getAttribute('data-raffle-group'))) details.open = true;
+    }
+}
+
+function renderBadges(){
+    const list = $("badgeList");
+    if(list) list.innerHTML = badges.length ? sortedBadges().map(b => badgeCard(b)).join("") : `<div class="empty">No badges added yet.</div>`;
+}
+
+function renderAchievements(){
+    const list = $("achievementList");
+    if(list) list.innerHTML = achievements.length ? sortedAchievements().map(a => achievementCard(a)).join("") : `<div class="empty">No achievements added yet.</div>`;
+}
+
+function setIncomePeriod(period){
+    incomePeriod = period;
+    document.querySelectorAll(".period-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.period === period));
+    renderIncomeDashboard();
+}
+
+function withinIncomePeriod(value){
+    if(incomePeriod === "all") return true;
+    const d = toDate(value);
+    if(!d) return false;
+    const now = new Date();
+    if(incomePeriod === "today") return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate();
+    const days = incomePeriod === "7d" ? 7 : 30;
+    const cutoff = new Date(now.getTime() - days*86400000);
+    return d >= cutoff && d <= now;
+}
+
+function getIncomeActivity(){
+    const rows = [];
+    for(const raffle of raffles){
+        const a = raffleAmounts(raffle);
+        const date = raffle.date || raffle.created_at || raffle.updated_at;
+        const name = raffle.server_name || raffle.title || "Raffle";
+        const net = Number(a.received || 0) - Number(a.spent || 0);
+        if(net > 0) rows.push({type:"income", title:"Raffle profit", subtitle:name, amount:net, date, icon:"↙"});
+        else if(net < 0) rows.push({type:"expense", title:"Raffle loss", subtitle:name, amount:net, date, icon:"↗"});
+    }
+    for(const payment of grinderPayments){
+        rows.push({type:"expense", title:"Grinder payment", subtitle:`${payment.server_name || "Grinder"} · ${Number(payment.duration_days)||7}-day membership`, amount:-Math.abs(Number(payment.amount)||0), date:payment.paid_at || payment.created_at, icon:"▤"});
+    }
+    return rows.filter(r => withinIncomePeriod(r.date)).sort((a,b) => (toDate(b.date)?.getTime()||0)-(toDate(a.date)?.getTime()||0));
+}
+
+function renderIncomeDashboard(){
+    const rows = getIncomeActivity();
+    const income = rows.reduce((sum,row)=>sum+(row.amount>0?row.amount:0),0);
+    const expenses = rows.reduce((sum,row)=>sum+(row.amount<0?-row.amount:0),0);
+    const net = income-expenses;
+    if($("incomeNet")){ $("incomeNet").textContent = (net>=0?"+":"−") + formatMoney(Math.abs(net)); $("incomeNet").style.color = net>=0 ? "#247a49" : "#c24c45"; }
+    if($("incomeTotal")) $("incomeTotal").textContent = "+" + formatMoney(income);
+    if($("expenseTotal")) $("expenseTotal").textContent = "−" + formatMoney(expenses);
+    if($("incomeCaption")) $("incomeCaption").textContent = incomePeriod === "all" ? "All recorded raffle activity and grinder payments" : incomePeriod === "today" ? "Transactions recorded today" : `Transactions recorded in the last ${incomePeriod === "7d" ? "7 days" : "30 days"}`;
+    const activity = $("incomeActivity");
+    if(activity){
+        activity.innerHTML = rows.length ? rows.slice(0,8).map(row=>{
+            const positive = row.amount >= 0;
+            const d = toDate(row.date);
+            const dateText = d ? d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "Date unavailable";
+            return `<div class="activity-row"><div class="activity-icon ${positive?"":"expense"}">${row.icon}</div><div class="activity-info"><div class="activity-title">${escapeHTML(row.title)}</div><div class="activity-sub">${escapeHTML(row.subtitle)} · ${dateText}</div></div><div class="activity-amount ${positive?"positive":"negative"}">${positive?"+":"−"}${formatMoney(Math.abs(row.amount))}</div></div>`;
+        }).join("") : `<div class="empty">No transactions for this period yet.</div>`;
+    }
+}
+
+function renderDashboard(){
+    if($("statGrinders")) $("statGrinders").textContent = grinders.length;
+    if($("statHeists")) $("statHeists").textContent = heists.length;
+    if($("statRaffles")) $("statRaffles").textContent = raffles.length;
+    if($("statAchievements")) $("statAchievements").textContent = achievements.length;
+    renderIncomeDashboard();
+
+    const list = $("dashboardUrgent");
+    if(!list) return;
+    const urgentGrinders = sortedGrinders().slice(0, 2).map(g => grinderCard(g));
+    const urgentHeists = sortedHeists().slice(0, 2).map(h => heistCard(h));
+    const allUrgent = [...urgentGrinders, ...urgentHeists];
+    list.innerHTML = allUrgent.length ? allUrgent.join("") : `<div class="empty">No upcoming deadlines or heists.</div>`;
+}
+
+function raffleAmounts(item){
+    // Prefer the new bot columns when present; fall back to legacy website fields.
+    const spent = Number(item.amount_entered ?? item.spent ?? 0);
+    const received = Number(item.amount_received ?? item.won ?? 0);
+    return { spent, received, net: received - spent, result: String(item.result || '').toLowerCase() };
+}
+
+function renderStatistics(){
+    const totalFees = grinders.reduce((acc, curr) => acc + Number(curr.fee || 0), 0);
+    const totals = raffles.reduce((acc, item) => {
+        const a = raffleAmounts(item);
+        acc.spent += a.spent;
+        acc.received += a.received;
+        acc.wins += a.result === 'win' ? 1 : 0;
+        acc.losses += a.result === 'loss' ? 1 : 0;
+        if(a.result === 'win') acc.winProfit += Math.max(0, a.net);
+        if(a.result === 'loss') acc.lossAmount += a.spent;
+        return acc;
+    }, { spent: 0, received: 0, wins: 0, losses: 0, winProfit: 0, lossAmount: 0 });
+    const net = totals.received - totals.spent;
+    if($("statFeeTotal")) $("statFeeTotal").textContent = formatMoney(totalFees);
+    if($("statRaffleEntered")) $("statRaffleEntered").textContent = formatMoney(totals.spent);
+    if($("statRaffleReceived")) $("statRaffleReceived").textContent = formatMoney(totals.received);
+    if($("statRaffleNet")) $("statRaffleNet").textContent = formatMoney(net);
+    if($("raffleTotalSpent")) $("raffleTotalSpent").textContent = formatMoney(totals.spent);
+    if($("raffleTotalReceived")) $("raffleTotalReceived").textContent = formatMoney(totals.received);
+    if($("raffleTotalNet")) $("raffleTotalNet").textContent = formatMoney(net);
+    if($("raffleWinLossCount")) $("raffleWinLossCount").textContent = `${totals.wins} / ${totals.losses}`;
+    if($("raffleWinProfit")) $("raffleWinProfit").textContent = formatMoney(totals.winProfit);
+    if($("raffleLossAmount")) $("raffleLossAmount").textContent = formatMoney(totals.lossAmount);
+}
+
+function renderAll(){
+    renderDashboard();
+    renderGrinders();
+    renderHeists();
+    renderRaffles();
+    renderBadges();
+    renderAchievements();
+    renderStatistics();
+}
+
+function updateCountdowns(){
+    // Update countdown text in place; do not rebuild cards every second.
+    document.querySelectorAll('[data-countdown]').forEach(el => {
+        el.textContent = countdown(el.getAttribute('data-countdown'));
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadAll();
+    setInterval(updateCountdowns, 1000);
+    setInterval(loadAll, 30000);
+});
+</script>
+<script>
+// Register the PWA service worker. It only caches this app's own files,
+// never Supabase/API responses, so live data continues to come from Supabase.
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(err => {
+      console.warn('Dank Tracker offline support could not be registered:', err);
+    });
+  });
+}
+</script>
+</body>
+</html>
